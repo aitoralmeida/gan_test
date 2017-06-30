@@ -21,6 +21,7 @@ from keras.layers import BatchNormalization
 from keras.optimizers import Adam, RMSprop
 
 import matplotlib.pyplot as plt
+matplotlib.use('Agg')
 
 class ElapsedTimer(object):
     def __init__(self):
@@ -184,10 +185,8 @@ class MNIST_DCGAN(object):
             i = np.random.randint(0, self.x_train.shape[0], samples)
             images = self.x_train[i, :, :, :]
 
-        try:
-            plt.figure(figsize=(10,10))        
-        except:
-            pass
+        plt.figure(figsize=(10,10))        
+
         for i in range(images.shape[0]):
             plt.subplot(4, 4, i+1)
             image = images[i, :, :, :]
@@ -204,7 +203,7 @@ class MNIST_DCGAN(object):
 if __name__ == '__main__':
     mnist_dcgan = MNIST_DCGAN()
     timer = ElapsedTimer()
-    mnist_dcgan.train(train_steps=10000, batch_size=256, save_interval=500)
+    mnist_dcgan.train(train_steps=100, batch_size=256, save_interval=10)
     timer.elapsed_time()
     mnist_dcgan.plot_images(fake=True)
     mnist_dcgan.plot_images(fake=False, save2file=True)
