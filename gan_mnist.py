@@ -20,8 +20,10 @@ from keras.layers import LeakyReLU, Dropout
 from keras.layers import BatchNormalization
 from keras.optimizers import Adam, RMSprop
 
-import matplotlib.pyplot as plt
+import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 
 class ElapsedTimer(object):
     def __init__(self):
