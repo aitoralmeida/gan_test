@@ -172,7 +172,7 @@ class MNIST_DCGAN(object):
                 if (i+1)%save_interval==0:
                     self.plot_images(save2file=True, samples=noise_input.shape[0], noise=noise_input, step=(i+1))
 
-    def plot_images(self, save2file=False, fake=True, samples=16, noise=None, step=0):
+    def plot_images(self, save2file=True, fake=True, samples=16, noise=None, step=0):
         filename = 'mnist.png'
         if fake:
             if noise is None:
@@ -184,7 +184,10 @@ class MNIST_DCGAN(object):
             i = np.random.randint(0, self.x_train.shape[0], samples)
             images = self.x_train[i, :, :, :]
 
-        plt.figure(figsize=(10,10))
+        try:
+            plt.figure(figsize=(10,10))        
+        except:
+            pass
         for i in range(images.shape[0]):
             plt.subplot(4, 4, i+1)
             image = images[i, :, :, :]
