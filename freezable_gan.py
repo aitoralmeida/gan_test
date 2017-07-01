@@ -2,10 +2,15 @@
 """
 Created on Fri Jun 30 10:26:01 2017
 
-From:
+Based on:
 https://medium.com/towards-data-science/gan-by-example-using-keras-on-tensorflow-backend-1a6d515a60d0
 https://github.com/roatienza/Deep-Learning-Experiments/blob/master/Experiments/Tensorflow/GAN/dcgan_mnist.py
 
+Changes:
+- Now is possible to freeze the discriminator model when training the adversarial model.
+
+TODO:
+- Allow to fair train the discriminator model (marking the images created with the generator as 0 in "y")
 """
 
 
@@ -157,12 +162,13 @@ class MNIST_DCGAN(object):
         self.adversarial = self.DCGAN.adversarial_model()
         self.generator = self.DCGAN.generator()
 
-    def train(self, train_steps=2000, batch_size=256, save_interval=0):
+    def train(self, train_steps=2000, batch_size=256, save_interval=0, freeze = False):
         noise_input = None
         if save_interval>0:
             noise_input = np.random.uniform(-1.0, 1.0, size=[16, 100])
         for i in range(train_steps):
-            self.DCGAN.change_D_trainable(True)
+	    if freeze:
+                self.DCGAN.change_D_trainable(True)
 	    images_train = self.x_train[np.random.randint(0, self.x_train.shape[0], size=batch_size), :, :, :]
             noise = np.random.uniform(-1.0, 1.0, size=[batch_size, 100])
             images_fake = self.generator.predict(noise)
@@ -171,7 +177,8 @@ class MNIST_DCGAN(object):
             y[batch_size:, :] = 0
             d_loss = self.discriminator.train_on_batch(x, y)
 
-            self.DCGAN.change_D_trainable(False)
+	    if freeze:
+            	self.DCGAN.change_D_trainable(False)
             y = np.ones([batch_size, 1])
             noise = np.random.uniform(-1.0, 1.0, size=[batch_size, 100])
             a_loss = self.adversarial.train_on_batch(noise, y)
@@ -212,7 +219,7 @@ class MNIST_DCGAN(object):
 if __name__ == '__main__':
     mnist_dcgan = MNIST_DCGAN()
     timer = ElapsedTimer()
-    mnist_dcgan.train(train_steps=500, batch_size=256, save_interval=10)
+    mnist_dcgan.train(train_steps=500, batch_size=256, save_interval=10, freeze = True)
     timer.elapsed_time()
     mnist_dcgan.plot_images(fake=True)
     mnist_dcgan.plot_images(fake=False, save2file=True)
