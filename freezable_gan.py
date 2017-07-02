@@ -8,9 +8,10 @@ https://github.com/roatienza/Deep-Learning-Experiments/blob/master/Experiments/T
 
 Changes:
 - Now is possible to freeze the discriminator model when training the adversarial model.
+- allow to fair train the discriminator model (marking the images created with the generator as 0 in "y")
 
-TODO:
-- Allow to fair train the discriminator model (marking the images created with the generator as 0 in "y")
+Todo:
+- Shuffle the training examples during the fair training.
 """
 
 
@@ -162,7 +163,7 @@ class MNIST_DCGAN(object):
         self.adversarial = self.DCGAN.adversarial_model()
         self.generator = self.DCGAN.generator()
 
-    def train(self, train_steps=2000, batch_size=256, save_interval=0, freeze = False):
+    def train(self, train_steps=2000, batch_size=256, save_interval=0, freeze = False, fair_train_d = False):
         noise_input = None
         if save_interval>0:
             noise_input = np.random.uniform(-1.0, 1.0, size=[16, 100])
@@ -172,8 +173,16 @@ class MNIST_DCGAN(object):
 	    images_train = self.x_train[np.random.randint(0, self.x_train.shape[0], size=batch_size), :, :, :]
             noise = np.random.uniform(-1.0, 1.0, size=[batch_size, 100])
             images_fake = self.generator.predict(noise)
-            x = np.concatenate((images_train, images_fake))
-            y = np.ones([2*batch_size, 1])
+	    x = np.concatenate((images_train, images_fake))
+            if fair_train_d:
+		# Fake images are markes as 0, so the discriminator learn from fair examples
+		y_true = np.ones([batch_size, 1])
+		y_false = np.zeros([batch_size, 1])
+		y = np.concatenate((y_true, y_false))
+		#TODO: Shuffle the training examples
+	    else:
+		# The fake images are marked as 1, the same as the real images
+		y = np.ones([2*batch_size, 1])
             y[batch_size:, :] = 0
             d_loss = self.discriminator.train_on_batch(x, y)
 
@@ -219,7 +228,8 @@ class MNIST_DCGAN(object):
 if __name__ == '__main__':
     mnist_dcgan = MNIST_DCGAN()
     timer = ElapsedTimer()
-    mnist_dcgan.train(train_steps=500, batch_size=256, save_interval=10, freeze = True)
+    print 'Training...'
+    mnist_dcgan.train(train_steps=500, batch_size=256, save_interval=10, freeze = True, fair_train_d = True)
     timer.elapsed_time()
     mnist_dcgan.plot_images(fake=True)
     mnist_dcgan.plot_images(fake=False, save2file=True)
