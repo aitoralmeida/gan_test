@@ -12,6 +12,7 @@ Changes:
 
 Todo:
 - Shuffle the training examples during the fair training.
+- Prepare it to train faces using: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
 """
 
 
@@ -229,7 +230,7 @@ if __name__ == '__main__':
     mnist_dcgan = MNIST_DCGAN()
     timer = ElapsedTimer()
     print 'Training...'
-    mnist_dcgan.train(train_steps=500, batch_size=256, save_interval=10, freeze = True, fair_train_d = True)
+    mnist_dcgan.train(train_steps=30000, batch_size=256, save_interval=200, freeze = True, fair_train_d = True)
     timer.elapsed_time()
     mnist_dcgan.plot_images(fake=True)
     mnist_dcgan.plot_images(fake=False, save2file=True)
